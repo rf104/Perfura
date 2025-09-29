@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
-import { CartItem, User } from '../types';
+import { CartItem } from '../types';
 import Checkout, { OrderData } from './CheckOut';
 import OrderConfirmation from './OrderConfirmation';
 
@@ -10,8 +10,6 @@ interface CartProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
   totalPrice: number;
-  user: User | null;
-  onAuthRequired: () => void;
 }
 
 const Cart: React.FC<CartProps> = ({
@@ -20,18 +18,12 @@ const Cart: React.FC<CartProps> = ({
   onUpdateQuantity,
   onRemoveItem,
   totalPrice,
-  user,
-  onAuthRequired,
 }) => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   const [orderData, setOrderData] = useState<OrderData | null>(null);
 
   const handleCheckout = () => {
-    if (!user) {
-      onAuthRequired();
-      return;
-    }
     setShowCheckout(true);
   };
 
@@ -40,7 +32,7 @@ const Cart: React.FC<CartProps> = ({
     setShowCheckout(false);
     setShowOrderConfirmation(true);
     
-    // Clear cart items (you might want to do this in the parent component)
+    // Clear cart items
     items.forEach(item => onRemoveItem(item.product.id));
   };
 
@@ -59,7 +51,6 @@ const Cart: React.FC<CartProps> = ({
       <Checkout
         items={items}
         totalPrice={totalPrice}
-        user={user}
         onClose={() => setShowCheckout(false)}
         onOrderConfirm={handleOrderConfirm}
       />
@@ -175,7 +166,7 @@ const Cart: React.FC<CartProps> = ({
                 onClick={handleCheckout}
                 className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 dark:from-primary-500 dark:to-primary-600 text-white py-3 rounded-full font-semibold shadow-soft hover:shadow-glow dark:hover:shadow-dark-glow transition-all duration-300 transform hover:scale-105"
               >
-                {user ? 'Proceed to Checkout' : 'Sign In to Order'}
+                Proceed to Checkout
               </button>
               
               <button

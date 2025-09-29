@@ -1,13 +1,10 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { supabase } from './lib/supabase';
-import { User as SupabaseUser } from '@supabase/supabase-js';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
 import ProductDetail from './components/ProductDetail';
-import AuthModal from './components/AuthModal';
 import Cart from './components/Cart';
-import { Product, CartItem, User } from './types';
+import { Product, CartItem } from './types';
 
 // Dark mode context
 const DarkModeContext = createContext<{
@@ -20,24 +17,12 @@ const DarkModeContext = createContext<{
 
 export const useDarkMode = () => useContext(DarkModeContext);
 
-// Helper function to convert Supabase user to our User type
-const convertSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
-  if (!supabaseUser || !supabaseUser.email) return null;
-  return {
-    id: supabaseUser.id,
-    email: supabaseUser.email,
-    full_name: supabaseUser.user_metadata?.full_name
-  };
-};
-
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check localStorage or system preference
@@ -61,38 +46,6 @@ function App() {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
-  };
-
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(convertSupabaseUser(session?.user ?? null));
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(convertSupabaseUser(session?.user ?? null));
-    });
-
-    // Load products
-    loadProducts();
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const loadProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (error) {
-      console.error('Error loading products:', error);
-    }
   };
 
   const addToCart = (product: Product, quantity: number = 1) => {
@@ -149,8 +102,6 @@ function App() {
     <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 transition-all duration-500">
         <Navbar 
-          user={user}
-          onAuthClick={() => setShowAuthModal(true)}
           onCartClick={() => setShowCart(true)}
           cartItemCount={getTotalItems()}
           searchQuery={searchQuery}
@@ -185,17 +136,11 @@ function App() {
           ) : (
             <ProductDetail
               product={selectedProduct}
-              user={user}
               onBack={() => setSelectedProduct(null)}
               onAddToCart={addToCart}
-              onAuthRequired={() => setShowAuthModal(true)}
             />
           )}
         </main>
-
-        {showAuthModal && (
-          <AuthModal onClose={() => setShowAuthModal(false)} />
-        )}
 
         {showCart && (
           <Cart
@@ -204,8 +149,6 @@ function App() {
             onUpdateQuantity={updateCartQuantity}
             onRemoveItem={removeFromCart}
             totalPrice={getTotalPrice()}
-            user={user}
-            onAuthRequired={() => setShowAuthModal(true)}
           />
         )}
       </div>

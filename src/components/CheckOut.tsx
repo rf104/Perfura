@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { X, ArrowLeft, MapPin, Mail, Package, CreditCard } from 'lucide-react';
-import { CartItem, User } from '../types';
+import { CartItem } from '../types';
 
 interface CheckoutProps {
   items: CartItem[];
   totalPrice: number;
-  user: User | null;
   onClose: () => void;
   onOrderConfirm: (orderData: OrderData) => void;
 }
@@ -25,10 +24,10 @@ export interface OrderData {
   orderDate: string;
 }
 
-const Checkout: React.FC<CheckoutProps> = ({ items, totalPrice, user, onClose, onOrderConfirm }) => {
+const Checkout: React.FC<CheckoutProps> = ({ items, totalPrice, onClose, onOrderConfirm }) => {
   const [formData, setFormData] = useState({
-    name: user?.full_name || '',
-    email: user?.email || '',
+    name: '',
+    email: '',
     phone: '',
     address: '',
     city: '',
@@ -493,8 +492,8 @@ Please process this order at your earliest convenience.
                   </p>
                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                     <p className="text-xs text-blue-800 dark:text-blue-300">
-                      📧 Order confirmation will be sent to <strong>sajedullaharef@gmail.com</strong><br/>
-                      ✨ You'll receive an order confirmation on this page immediately
+                      📧 Order confirmation will be sent to <strong>perfura</strong><br/>
+                      ✨ You'll receive an order confirmation soon as we process your order.<br/>
                     </p>
                   </div>
                 </div>

@@ -109,7 +109,7 @@ For any queries, please contact us at sajedullaharef@gmail.com
           <div className="mt-4 bg-white/50 dark:bg-dark-800/50 backdrop-blur-sm rounded-lg p-3 inline-block">
             <p className="text-sm text-gray-700 dark:text-gray-300">
               📧 <strong>Order notification sent to:</strong><br/>
-              <span className="text-primary-600 dark:text-moonlight-400 font-semibold">sajedullaharef@gmail.com</span>
+              <span className="text-primary-600 dark:text-moonlight-400 font-semibold">Perfura</span>
             </p>
           </div>
         </div>
@@ -232,7 +232,7 @@ For any queries, please contact us at sajedullaharef@gmail.com
             <ul className="text-sm text-primary-700 dark:text-primary-300 space-y-2">
               <li className="flex items-start space-x-2">
                 <span className="text-green-500 font-bold">✅</span>
-                <span>Order confirmation sent to <strong>sajedullaharef@gmail.com</strong></span>
+                <span>Order confirmation sent to <strong>Perfura</strong></span>
               </li>
               <li className="flex items-start space-x-2">
                 <span className="text-blue-500 font-bold">📞</span>
@@ -244,7 +244,7 @@ For any queries, please contact us at sajedullaharef@gmail.com
               </li>
               <li className="flex items-start space-x-2">
                 <span className="text-orange-500 font-bold">🚚</span>
-                <span>Expected delivery time is <strong>3-5 business days</strong></span>
+                <span>Expected delivery time is <strong>2-3 business days</strong></span>
               </li>
             </ul>
           </div>

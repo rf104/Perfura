@@ -1,28 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Star, ShoppingCart, Heart, MessageCircle } from 'lucide-react';
-import { Product, Review, User } from '../types';
+import { ArrowLeft, Star, ShoppingCart, Heart } from 'lucide-react';
+import { Product, Review } from '../types';
 import { supabase } from '../lib/supabase';
-import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 
 interface ProductDetailProps {
   product: Product;
-  user: User | null;
   onBack: () => void;
   onAddToCart: (product: Product, quantity: number) => void;
-  onAuthRequired: () => void;
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({
   product,
-  user,
   onBack,
-  onAddToCart,
-  onAuthRequired
+  onAddToCart
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [showReviewForm, setShowReviewForm] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,11 +42,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
 
   const handleAddToCart = () => {
     onAddToCart(product, quantity);
-  };
-
-  const handleReviewSubmit = () => {
-    loadReviews();
-    setShowReviewForm(false);
   };
 
   const averageRating = reviews.length > 0 
@@ -184,33 +173,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
       <div className="mt-16 border-t border-gray-200 pt-12">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-charcoal">Customer Reviews</h2>
-          {user ? (
-            <button
-              onClick={() => setShowReviewForm(!showReviewForm)}
-              className="flex items-center space-x-2 bg-burgundy text-white px-6 py-3 rounded-full hover:bg-burgundy-dark transition-colors"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Write Review</span>
-            </button>
-          ) : (
-            <button
-              onClick={onAuthRequired}
-              className="flex items-center space-x-2 bg-gray-600 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-colors"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Sign In to Review</span>
-            </button>
-          )}
         </div>
-
-        {showReviewForm && user && (
-          <ReviewForm
-            productId={product.id}
-            user={user}
-            onSubmit={handleReviewSubmit}
-            onCancel={() => setShowReviewForm(false)}
-          />
-        )}
 
         {!loading && <ReviewList reviews={reviews} />}
       </div>
