@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ShoppingCartIcon, SunIcon, MoonIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useDarkMode } from '../App';
 
@@ -9,7 +9,7 @@ interface NavbarProps {
   onSearchChange: (query: string) => void;
   products: any[];
   onProductSelect: (product: any) => void;
-  onNavigate: (section: string) => void; // Add navigation handler
+  onNavigate: (section: string) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
@@ -19,13 +19,16 @@ const Navbar: React.FC<NavbarProps> = ({
   onSearchChange, 
   products, 
   onProductSelect,
-  onNavigate // Add navigation prop
+  onNavigate
 }) => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [showSearchResults, setShowSearchResults] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<any[]>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   // Sample products for search (same as ProductGrid)
   const sampleProducts = [
@@ -132,7 +135,8 @@ const Navbar: React.FC<NavbarProps> = ({
   // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node) &&
+          mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
         setShowSearchResults(false);
       }
     };
@@ -147,156 +151,310 @@ const Navbar: React.FC<NavbarProps> = ({
     onProductSelect(product);
     setShowSearchResults(false);
     onSearchChange(''); // Clear search
+    setShowMobileSearch(false);
+    setIsMenuOpen(false);
   };
 
   const handleNavClick = (section: string) => {
     onNavigate(section);
     setShowSearchResults(false);
     onSearchChange(''); // Clear search when navigating
+    setIsMenuOpen(false);
+    setShowMobileSearch(false);
+  };
+
+  const handleSearchChange = (value: string) => {
+    onSearchChange(value);
+  };
+
+  const toggleMobileSearch = () => {
+    setShowMobileSearch(!showMobileSearch);
+    setIsMenuOpen(false);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    setShowMobileSearch(false);
   };
 
   return (
-    <nav className="bg-white/90 dark:bg-dark-800/90 backdrop-blur-md border-b border-gray-200 dark:border-dark-700 sticky top-0 z-50 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo - Make clickable to go home */}
-          <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => handleNavClick('home')}>
-              <img 
-                src="/images/logo.jpeg" 
-                alt="Perfura Logo" 
-                className="w-12 h-12 rounded-full mr-3 shadow-glow dark:shadow-dark-glow object-cover border-2 border-primary-500/20 dark:border-moonlight-500/20"
-              />
-              <h1 className="text-2xl font-serif font-bold bg-gradient-to-r from-primary-600 to-moonlight-600 dark:from-primary-400 dark:to-moonlight-400 bg-clip-text text-transparent">
-                Perfura
-              </h1>
-            </div>
-          </div>
-
-          {/* Navigation Links - Hidden on mobile */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              <button 
+    <>
+      <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-lg border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            {/* Logo Section - Always visible but responsive */}
+            <div className="flex items-center flex-shrink-0">
+              <div 
+                className="flex items-center cursor-pointer group" 
                 onClick={() => handleNavClick('home')}
-                className="text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
-                Home
-              </button>
-              <button 
-                onClick={() => handleNavClick('collections')}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Collections
-              </button>
-              <button 
-                onClick={() => handleNavClick('offers')}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Offers
-              </button>
-              <button 
-                onClick={() => handleNavClick('about')}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                About
-              </button>
-            </div>
-          </div>
-
-          {/* Search Bar - Hidden on small screens */}
-          <div className="flex-1 max-w-md mx-8 hidden lg:block" ref={searchRef}>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search perfumes..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                onFocus={() => searchQuery.trim() !== '' && setShowSearchResults(true)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-dark-600 rounded-full bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-moonlight-400 focus:border-transparent transition-colors duration-200"
-              />
-              
-              {/* Search Results Dropdown */}
-              {showSearchResults && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
-                  {searchResults.map((product) => (
-                    <div
-                      key={product.id}
-                      onClick={() => handleProductClick(product)}
-                      className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-dark-700 cursor-pointer transition-colors duration-200 border-b border-gray-100 dark:border-dark-600 last:border-b-0"
-                    >
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-12 h-12 object-cover rounded-lg mr-3 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                          {product.name}
-                        </h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                          {product.brand}
-                        </p>
-                      </div>
-                      <div className="text-sm font-bold text-primary-600 dark:text-moonlight-400 ml-3">
-                        ৳{product.price}
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {searchResults.length === 5 && (
-                    <div className="p-3 text-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-dark-700">
-                      Showing top 5 results. Type more to refine search.
-                    </div>
-                  )}
+                {/* Logo image */}
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg mr-2 sm:mr-3 overflow-hidden">
+                  <img 
+                    src="/images/logo.jpeg" 
+                    alt="Perfura Logo" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to text if image fails to load
+                      e.currentTarget.style.display = 'none';
+                      (e.currentTarget.nextElementSibling as HTMLElement)!.style.display = 'flex';
+                    }}
+                  />
+                  <span className="text-white font-bold text-sm sm:text-lg hidden">P</span>
                 </div>
-              )}
-              
-              {/* No Results Message */}
-              {showSearchResults && searchResults.length === 0 && searchQuery.trim() !== '' && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl shadow-2xl z-50 p-4 text-center">
-                  <div className="text-gray-500 dark:text-gray-400 text-sm">
-                    No products found for "{searchQuery}"
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right side buttons */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            {/* Dark mode toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-moonlight-400 transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700"
-              aria-label="Toggle dark mode"
-            >
-              {isDarkMode ? (
-                <SunIcon className="h-5 w-5" />
-              ) : (
-                <MoonIcon className="h-5 w-5" />
-              )}
-            </button>
-
-            {/* Cart button */}
-            <button
-              onClick={onCartClick}
-              className="p-2 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-moonlight-400 transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 relative"
-              aria-label="Shopping cart"
-            >
-              <ShoppingCartIcon className="h-5 w-5" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-500 dark:bg-moonlight-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                  {cartItemCount > 99 ? '99+' : cartItemCount}
+                {/* Brand name - hidden on very small screens, visible on sm+ */}
+                <span className="hidden sm:block text-lg lg:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 group-hover:from-purple-600 group-hover:to-blue-600 transition-all duration-300">
+                  Perfura
                 </span>
-              )}
-            </button>
+              </div>
+            </div>
+
+            {/* Desktop Navigation Links - Hidden on mobile and tablet */}
+            <div className="hidden lg:block">
+              <div className="flex items-center space-x-6 xl:space-x-8">
+                <button 
+                  onClick={() => handleNavClick('home')}
+                  className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200 relative group"
+                >
+                  Home
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-200 group-hover:w-full"></span>
+                </button>
+                <button 
+                  onClick={() => handleNavClick('collections')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200 relative group"
+                >
+                  Collections
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-200 group-hover:w-full"></span>
+                </button>
+                <button 
+                  onClick={() => handleNavClick('offers')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200 relative group"
+                >
+                  Offers
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-200 group-hover:w-full"></span>
+                </button>
+                <button 
+                  onClick={() => handleNavClick('about')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200 relative group"
+                >
+                  About
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-200 group-hover:w-full"></span>
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop Search Bar - Hidden on mobile and tablet */}
+            <div className="flex-1 max-w-md mx-6 hidden lg:block" ref={searchRef}>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search perfumes..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => searchQuery.trim() !== '' && setShowSearchResults(true)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm text-sm transition-all duration-200"
+                />
+                
+                {/* Desktop Search Results Dropdown */}
+                {showSearchResults && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto backdrop-blur-xl">
+                    {searchResults.map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => handleProductClick(product)}
+                        className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+                      >
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-12 h-12 object-cover rounded-lg mr-3 flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                            {product.name}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {product.brand}
+                          </p>
+                        </div>
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 ml-3">
+                          ৳{product.price}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {searchResults.length === 5 && (
+                      <div className="p-3 text-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700">
+                        Showing top 5 results. Type more to refine search.
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* No Results Message */}
+                {showSearchResults && searchResults.length === 0 && searchQuery.trim() !== '' && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-2xl z-50 p-4 text-center backdrop-blur-xl">
+                    <div className="text-gray-500 dark:text-gray-400 text-sm">
+                      No products found for "{searchQuery}"
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right side buttons - Always visible */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Mobile Search Button - Visible on tablet and mobile */}
+              <button
+                onClick={toggleMobileSearch}
+                className="lg:hidden p-2 sm:p-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Search"
+              >
+                <MagnifyingGlassIcon className="h-5 w-5" />
+              </button>
+
+              {/* Dark mode toggle - Always visible */}
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 sm:p-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Toggle dark mode"
+              >
+                {isDarkMode ? (
+                  <SunIcon className="h-5 w-5" />
+                ) : (
+                  <MoonIcon className="h-5 w-5" />
+                )}
+              </button>
+
+              {/* Cart button - Always visible with count */}
+              <button
+                onClick={onCartClick}
+                className="p-2 sm:p-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 relative"
+                aria-label={`Shopping cart with ${cartItemCount} items`}
+              >
+                <ShoppingCartIcon className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center font-bold animate-pulse">
+                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Mobile menu button - Visible on tablet and mobile */}
+              <button
+                onClick={toggleMobileMenu}
+                className="lg:hidden p-2 sm:p-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Menu"
+              >
+                <svg className={`w-5 h-5 transition-transform duration-200 ${isMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
           </div>
+
+          {/* Mobile Search Bar - Appears when search button is clicked */}
+          {showMobileSearch && (
+            <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 py-3" ref={mobileSearchRef}>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search perfumes..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => searchQuery.trim() !== '' && setShowSearchResults(true)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm text-sm"
+                  autoFocus
+                />
+                
+                {/* Mobile Search Results Dropdown */}
+                {showSearchResults && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-2xl z-50 max-h-80 overflow-y-auto backdrop-blur-xl">
+                    {searchResults.map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => handleProductClick(product)}
+                        className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+                      >
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-12 h-12 object-cover rounded-lg mr-3 flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                            {product.name}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {product.brand}
+                          </p>
+                        </div>
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 ml-3">
+                          ৳{product.price}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Mobile No Results Message */}
+                {showSearchResults && searchResults.length === 0 && searchQuery.trim() !== '' && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-2xl z-50 p-4 text-center backdrop-blur-xl">
+                    <div className="text-gray-500 dark:text-gray-400 text-sm">
+                      No products found for "{searchQuery}"
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Menu Dropdown - Functional buttons */}
+          {isMenuOpen && (
+            <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 py-3 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80">
+              <div className="flex flex-col space-y-1">
+                <button 
+                  onClick={() => handleNavClick('home')}
+                  className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-3 text-sm font-medium text-left rounded-lg transition-colors duration-200 w-full"
+                >
+                  🏠 Home
+                </button>
+                <button 
+                  onClick={() => handleNavClick('collections')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-3 text-sm font-medium text-left rounded-lg transition-colors duration-200 w-full"
+                >
+                  📦 Collections
+                </button>
+                <button 
+                  onClick={() => handleNavClick('offers')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-3 text-sm font-medium text-left rounded-lg transition-colors duration-200 w-full"
+                >
+                  🎯 Offers
+                </button>
+                <button 
+                  onClick={() => handleNavClick('about')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-3 text-sm font-medium text-left rounded-lg transition-colors duration-200 w-full"
+                >
+                  ℹ️ About
+                </button>
+                <button 
+                  onClick={() => handleNavClick('contact')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-3 text-sm font-medium text-left rounded-lg transition-colors duration-200 w-full"
+                >
+                  📞 Contact
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 
