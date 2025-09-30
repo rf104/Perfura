@@ -9,9 +9,18 @@ interface NavbarProps {
   onSearchChange: (query: string) => void;
   products: any[];
   onProductSelect: (product: any) => void;
+  onNavigate: (section: string) => void; // Add navigation handler
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onCartClick, cartItemCount, searchQuery, onSearchChange, products, onProductSelect }) => {
+const Navbar: React.FC<NavbarProps> = ({ 
+  onCartClick, 
+  cartItemCount, 
+  searchQuery, 
+  onSearchChange, 
+  products, 
+  onProductSelect,
+  onNavigate // Add navigation prop
+}) => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [showSearchResults, setShowSearchResults] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<any[]>([]);
@@ -140,13 +149,19 @@ const Navbar: React.FC<NavbarProps> = ({ onCartClick, cartItemCount, searchQuery
     onSearchChange(''); // Clear search
   };
 
+  const handleNavClick = (section: string) => {
+    onNavigate(section);
+    setShowSearchResults(false);
+    onSearchChange(''); // Clear search when navigating
+  };
+
   return (
     <nav className="bg-white/90 dark:bg-dark-800/90 backdrop-blur-md border-b border-gray-200 dark:border-dark-700 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+          {/* Logo - Make clickable to go home */}
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
+            <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => handleNavClick('home')}>
               <img 
                 src="/images/logo.jpeg" 
                 alt="Perfura Logo" 
@@ -161,18 +176,30 @@ const Navbar: React.FC<NavbarProps> = ({ onCartClick, cartItemCount, searchQuery
           {/* Navigation Links - Hidden on mobile */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <a href="#" className="text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200">
+              <button 
+                onClick={() => handleNavClick('home')}
+                className="text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
                 Home
-              </a>
-              <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200">
+              </button>
+              <button 
+                onClick={() => handleNavClick('collections')}
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
                 Collections
-              </a>
-              <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200">
+              </button>
+              <button 
+                onClick={() => handleNavClick('offers')}
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
                 Offers
-              </a>
-              <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200">
+              </button>
+              <button 
+                onClick={() => handleNavClick('about')}
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
                 About
-              </a>
+              </button>
             </div>
           </div>
 
