@@ -27,7 +27,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductSelect, on
     },
     {
       id: '2',
-      name: 'Cool Water',
+      name: 'SRK Special',
       brand: 'Perfura Special',
       price: 799,
       description: 'Deep, mysterious oud with hints of amber and sandalwood',
@@ -40,7 +40,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductSelect, on
     },
     {
       id: '3',
-      name: 'Dior Sauvage',
+      name: 'Vampire Blood',
       brand: 'Perfura Special',
       price: 799,
       description: 'Refreshing blend of bergamot, lemon, and white tea',
@@ -66,7 +66,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductSelect, on
     },
     {
       id: '5',
-      name: 'Ocean Mist',
+      name: 'Vampire Blood',
       brand: 'Aqua Essence',
       price: 799,
       description: 'Fresh marine scent with sea salt and driftwood',
@@ -79,9 +79,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductSelect, on
     },
     {
       id: '6',
-      name: 'Golden Amber',
+      name: 'Good Girl',
       brand: 'Imperial',
-      price: 200,
+      price: 810,
       description: 'Luxurious amber with gold leaf and precious woods',
       image_url: '/images/11.jpeg',
       category: 'Oriental',
