@@ -85,7 +85,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductSelect, on
       description: 'Luxurious amber with gold leaf and precious woods',
       image_url: '/images/11.jpeg',
       category: 'Oriental',
-      volume: '50ml',
+      volume: '30ml',
       notes: ['Amber', 'Gold Leaf', 'Cedar'],
       rating: 4.9,
       created_at: new Date().toISOString()
